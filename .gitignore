@@ -315,6 +315,16 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# Next.js / static export
+.next/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment variables (except example files)
+.env*.local
+.env
+
 # Visual Studio 6 build log
 *.plg
 

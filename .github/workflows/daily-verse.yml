@@ -1,0 +1,44 @@
+name: Daily Verse
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate daily verse
+        env:
+          BIBLE_API_KEY: ${{ secrets.BIBLE_API_KEY }}
+          BIBLE_API_BASE_URL: ${{ vars.BIBLE_API_BASE_URL || 'https://rest.api.bible/v1' }}
+          BIBLE_ID: ${{ vars.BIBLE_ID || 'de4e12af7f28f599-01' }}
+        run: npm run generate-daily-verse
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/daily-verse.json public/verses/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update daily verse for $(date -u +%Y-%m-%d)"
+            git push
+          fi
